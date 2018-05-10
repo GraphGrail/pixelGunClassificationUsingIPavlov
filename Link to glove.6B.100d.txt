@@ -1,0 +1,1 @@
+/home/algu/DeepPavlov/download/embeddings/glove.6B.100d.txt

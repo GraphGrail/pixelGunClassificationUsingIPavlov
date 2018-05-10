@@ -1,0 +1,92 @@
+{
+  "deeppavlov_root": "",
+  "dataset_reader": {
+    "name": "basic_classification_reader",
+    "data_path": "",
+    "sep": "\t"
+  },
+  "dataset_iterator": {
+    "name": "basic_classification_iterator",
+    "seed": 42,
+    "fields_to_merge": [
+      "train",
+      "valid"
+    ],
+    "merged_field": "train",
+    "field_to_split": "train",
+    "split_fields": [
+      "train",
+      "valid"
+    ],
+    "split_proportions": [
+      0.9,
+      0.1
+    ]
+  },
+  "chainer": {
+    "in": ["x"],
+    "in_y": ["y"],
+    "pipe": [
+      {
+        "id": "pixelGunClasses_vocab",
+        "name": "default_vocab",
+        "fit_on": ["y"],
+        "level": "token",
+        "save_path": "pixelGunCategory.dict",
+        "load_path": "pixelGunCategory.dict"
+      },
+      {
+        "in": ["x"],
+        "in_y": ["y"],
+        "out": ["y_predicted"],
+        "main": true,
+        "name": "intent_model",
+        "save_path": "pixelGunclassification_cnn",
+        "load_path": "pixelGunclassification_cnn",
+        "classes": "#pixelGunClasses_vocab.keys()",
+        "opt": {
+          "kernel_sizes_cnn": [
+            3,
+            3,
+            3
+          ],
+          "filters_cnn": 512,
+          "confident_threshold": 0.5,
+          "optimizer": "Adam",
+          "lear_rate": 0.1,
+          "lear_rate_decay": 0.1,
+          "loss": "binary_crossentropy",
+          "text_size": 15,
+          "coef_reg_cnn": 1e-4,
+          "coef_reg_den": 1e-4,
+          "dropout_rate": 0.5,
+          "dense_size": 200,
+          "model_name": "cnn_model"
+        },
+        "embedder": {
+          "name": "fasttext",
+          "save_path": "Link to wiki.en.bin",
+          "load_path": "Link to wiki.en.bin",
+          "emb_module": "fasttext",
+          "dim": 300
+        },
+        "tokenizer": {
+          "name": "nltk_tokenizer",
+          "tokenizer": "wordpunct_tokenize"
+        }
+      }
+    ],
+    "out": ["y_predicted"]
+  },
+  "train": {
+    "epochs": 100,
+    "batch_size": 64,
+    "metrics": [
+      "sets_accuracy"
+    ],
+    "validation_patience": 5,
+    "val_every_n_epochs": 5,
+    "log_every_n_batches": 100,
+    "show_examples": false
+  }
+}
